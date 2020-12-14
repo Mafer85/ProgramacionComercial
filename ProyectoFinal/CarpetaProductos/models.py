@@ -25,3 +25,16 @@ class producto(models.Model):
     )
     def __str__(self):
         return self.nombre_producto
+
+
+class factura(models.Model):
+    Nombre_Cliente = models.CharField(max_length=100)
+    Producto = models.ForeignKey(producto,related_name="producto", on_delete=models.CASCADE)
+    serie = models.IntegerField()
+    nit = models.CharField(max_length=30)
+    cantidad = models.IntegerField()
+    Fecha = models.DateField()
+    total = models.FloatField()
+
+    def __int__(self):
+        return self.serie
