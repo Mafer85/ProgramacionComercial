@@ -137,6 +137,113 @@ class DeleteProducto(graphene.relay.ClientIDMutation):
         Producto.delete()
         return DeleteProducto(Producto=Producto)
 
+class createCategoria(graphene.relay.ClientIDMutation):
+    Categoria = graphene.Field(categoriaNode)
+
+    class Input:
+        nombre_categoria=  graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Categoria = categoria(
+        nombre_categoria = input.get('nombre_categoria'),
+        )
+        Categoria.save()
+        return createCategoria(Categoria = Categoria)
+
+class UpdateCategoria(graphene.relay.ClientIDMutation):
+    Categoria = graphene.Field(categoriaNode)
+
+    class Input:
+        id = graphene.String()
+        nombre_categoria = graphene.String()
+
+
+    def mutate_and_get_payload(root, info, **input):
+        Categoria = categoria.objects.get(
+            pk =from_global_id(input.get('id'))[1])
+        Categoria.nombre_categoria = input.get('nombre_categoria')
+        Categoria.save()
+        return UpdateCategoria(Categoria=Categoria)
+
+class DeleteCategoria(graphene.relay.ClientIDMutation):
+    Categoria = graphene.Field(categoriaNode)
+
+    class Input:
+        id = graphene.String()
+
+    def mutate_and_get_payload(root,info, **input):
+        Categoria = categoria.objects.get(
+            pk=from_global_id(input.get('id'))[1]
+        )
+        Categoria.delete()
+        return DeleteCategoria(Categoria = Categoria)
+
+class createFactura(graphene.relay.ClientIDMutation):
+    Factura = graphene.Field(facturaNode)
+    class Input:
+        Nombre_Cliente =  graphene.String()
+        nombre_producto = graphene.String()
+        serie = graphene.Int()
+        nit = graphene.String()
+        cantidad = graphene.Int()
+        Fecha = graphene.Date()
+        total = graphene.Float()
+
+    def mutate_and_get_payload(root, info, **input):
+        Factura = factura(
+        Nombre_Cliente = input.get('Nombre_Cliente'),
+        Producto= producto.objects.get(
+        nombre_producto= input.get('nombre_producto')),
+        serie= input.get('serie'),
+        cantidad = input.get('cantidad'),
+        nit = input.get('nit'),
+        Fecha = input.get('Fecha'),
+        total = input.get('total'),
+)
+        Factura.save()
+        return createFactura(Factura = Factura)
+
+class UpdateFactura(graphene.relay.ClientIDMutation):
+    Factura = graphene.Field(facturaNode)
+
+    class Input:
+        id = graphene.String()
+        Nombre_Cliente =  graphene.String()
+        nombre_producto = graphene.String()
+        serie = graphene.Int()
+        nit = graphene.String()
+        cantidad = graphene.Int()
+        Fecha = graphene.Date()
+        total = graphene.Float()
+        usuarios = graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Factura = factura.objects.get(
+            pk =from_global_id(input.get('id'))[1])
+        Factura.Nombre_Cliente = input.get('Nombre_Cliente')
+        Factura.Producto= producto.objects.get(
+            nombre_producto= input.get('nombre_producto'))
+        Factura.serie = input.get('serie')
+        Factura.nit = input.get('nit')
+        Factura.cantidad = input.get('cantidad')
+        Factura.Fecha = input.get('Fecha')
+        Factura.total = input.get('total')
+        Factura.save()
+        return UpdateFactura(Factura=Factura)
+
+class DeleteFactura(graphene.relay.ClientIDMutation):
+    Factura = graphene.Field(facturaNode)
+
+    class Input:
+        id = graphene.String()
+
+
+    def mutate_and_get_payload(root, info, **input):
+        Factura = factura.objects.get(
+            pk =from_global_id(input.get('id'))[1])
+
+        Factura.delete()
+        return DeleteFactura(Factura=Factura)
 
 
 class Query(object):
