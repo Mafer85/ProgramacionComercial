@@ -28,6 +28,117 @@ class facturaNode(DjangoObjectType):
         filter_fields=['Nombre_Cliente','Producto','serie','nit','cantidad','Fecha','total']
         interfaces = (graphene.relay.Node,)
 
+class createEmpleado(graphene.relay.ClientIDMutation):
+    Empleado = graphene.Field(empleadoNode)
+
+    class Input:
+        usuarios=  graphene.String()
+        Contrasenia = graphene.String()
+        Roles = graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Empleado = empleado(
+        usuarios = input.get('usuarios'),
+        Contrasenia = input.get('Contrasenia'),
+        Roles = input.get('Roles')
+        )
+        Empleado.save()
+        return createEmpleado(Empleado = Empleado)
+
+
+class UpdateEmpleado(graphene.relay.ClientIDMutation):
+    Empleado = graphene.Field(empleadoNode)
+
+    class Input:
+        id = graphene.String()
+        usuarios = graphene.String()
+        Contrasenia = graphene.String()
+        Roles = graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Empleado = empleado.objects.get(
+            pk =from_global_id(input.get('id'))[1])
+        Empleado.usuarios = input.get('usuarios')
+        Empleado.Contrasenia = input.get('Contrasenia')
+        Empleado.Roles = input.get('Roles')
+        Empleado.save()
+        return UpdateEmpleado(Empleado=Empleado)
+
+class DeleteEmpleado(graphene.relay.ClientIDMutation):
+    Empleado = graphene.Field(empleadoNode)
+
+    class Input:
+        id = graphene.String()
+
+    def mutate_and_get_payload(root,info, **input):
+        Empleado = empleado.objects.get(
+            pk=from_global_id(input.get('id'))[1]
+        )
+        Empleado.delete()
+        return DeleteEmpleado(Empleado = Empleado)
+
+
+class CreateProducto(graphene.relay.ClientIDMutation):
+    Producto = graphene.Field(productoNode)
+
+    class Input:
+        nombre_producto = graphene.String()
+        Descripcion = graphene.String()
+        Existencia = graphene.Int()
+        Precio = graphene.Float()
+        nombre_categoria= graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Producto = producto(
+        nombre_producto = input.get('nombre_producto'),
+        Descripcion = input.get('Descripcion'),
+        Existencia = input.get('Existencia'),
+        Precio = input.get('Precio'),
+        Categoria = categoria.objects.get(
+            nombre_categoria = input.get('nombre_categoria')
+        )
+        )
+        Producto.save()
+        return CreateProducto(Producto = Producto)
+
+class UpdateProducto(graphene.relay.ClientIDMutation):
+    Producto = graphene.Field(productoNode)
+
+    class Input:
+        id = graphene.String()
+        nombre_producto = graphene.String()
+        Descripcion = graphene.String()
+        Existencia = graphene.Int()
+        Precio = graphene.Float()
+        nombre_categoria= graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Producto = producto.objects.get(
+            pk = from_global_id(input.get('id'))[1])
+        Producto.nombre_producto = input.get('nombre_producto')
+        Producto.Descripcion = input.get('Descripcion')
+        Producto.Existencia = input.get('Existencia')
+        Producto.Precio = input.get('Precio')
+        Producto.Categoria = categoria.objects.get(
+            nombre_categoria = input.get('nombre_categoria')
+        )
+        Producto.save()
+        return UpdateProducto(Producto=Producto)
+
+class DeleteProducto(graphene.relay.ClientIDMutation):
+    Producto = graphene.Field(productoNode)
+
+    class Input:
+        id = graphene.String()
+
+    def mutate_and_get_payload(root, info, **input):
+        Producto = producto.objects.get(
+            pk = from_global_id(input.get('id'))[1])
+        Producto.delete()
+        return DeleteProducto(Producto=Producto)
+
+
+
 class Query(object):
     empleado = graphene.relay.Node.Field(empleadoNode)
     all_empleados = DjangoFilterConnectionField(empleadoNode)
