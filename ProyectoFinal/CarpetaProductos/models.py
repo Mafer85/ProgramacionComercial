@@ -8,3 +8,20 @@ class empleado(models.Model):
 
     def __str__(self):
         return self.usuarios
+
+class categoria(models.Model):
+    nombre_categoria = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.nombre_categoria
+
+class producto(models.Model):
+    nombre_producto = models.CharField(max_length=30)
+    Descripcion = models.CharField(max_length=300)
+    Existencia = models.IntegerField()
+    Precio = models.FloatField()
+    Categoria = models.ForeignKey(
+    categoria,  on_delete=models.CASCADE
+    )
+    def __str__(self):
+        return self.nombre_producto
