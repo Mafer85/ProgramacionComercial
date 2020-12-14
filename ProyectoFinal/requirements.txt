@@ -20,3 +20,4 @@ six==1.15.0
 sqlparse==0.4.1
 Unidecode==1.1.1
 whitenoise==5.2.0
+python==3.8
