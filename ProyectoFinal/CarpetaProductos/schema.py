@@ -15,7 +15,7 @@ class categoriaNode (DjangoObjectType):
         model = categoria
         filter_fields=['nombre_categoria']
         interfaces = (graphene.relay.Node,)
-        
+
 class productoNode(DjangoObjectType):
     class Meta:
         model = producto
@@ -27,3 +27,16 @@ class facturaNode(DjangoObjectType):
         model = factura
         filter_fields=['Nombre_Cliente','Producto','serie','nit','cantidad','Fecha','total']
         interfaces = (graphene.relay.Node,)
+
+class Query(object):
+    empleado = graphene.relay.Node.Field(empleadoNode)
+    all_empleados = DjangoFilterConnectionField(empleadoNode)
+
+    categoria = graphene.relay.Node.Field(categoriaNode)
+    all_categorias = DjangoFilterConnectionField(categoriaNode)
+
+    producto = graphene.relay.Node.Field(productoNode)
+    all_productos = DjangoFilterConnectionField(productoNode)
+
+    factura = graphene.relay.Node.Field(facturaNode)
+    all_facturas = DjangoFilterConnectionField(facturaNode)
