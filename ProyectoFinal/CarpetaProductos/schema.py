@@ -258,3 +258,17 @@ class Query(object):
 
     factura = graphene.relay.Node.Field(facturaNode)
     all_facturas = DjangoFilterConnectionField(facturaNode)
+
+class Mutation(graphene.AbstractType):
+    create_Empleado = createEmpleado.Field()
+    update_Empleado = UpdateEmpleado.Field()
+    delete_Empleado = DeleteEmpleado.Field()
+    create_Producto = CreateProducto.Field()
+    update_Producto = UpdateProducto.Field()
+    delete_Producto = DeleteProducto.Field()
+    create_Categoria = createCategoria.Field()
+    update_Categoria= UpdateCategoria.Field()
+    delete_Categoria = DeleteCategoria.Field()
+    create_Factura = createFactura.Field()
+    update_Factura = UpdateFactura.Field()
+    delete_Factura = DeleteFactura.Field()
