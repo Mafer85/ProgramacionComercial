@@ -132,7 +132,7 @@ export default {
 						encontrado=true
 					}
 				})
-			this.rol_idT = encontrado == true ? elementoE:{id:dato.nombre,nombre:'No Existe'}
+			this.rol_idT = encontrado == true ? elementoE:{id:data.Roles,nombre:'No Existe'}
 			this.abrirEditar=true
 		},
 		async editarUsuario(){

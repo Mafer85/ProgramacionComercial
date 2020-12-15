@@ -11,8 +11,6 @@
     <span class="text-danger text-sm">{{ errors.first('usuario') }}</span>
 
     <vs-input
-        data-vv-validate-on="blur"
-        v-validate="'required|min:6|max:10'"
         type="password"
         name="password"
         icon-no-border
@@ -39,11 +37,6 @@ export default {
 	  arrayData:[]
     }
   },
-  computed: {
-    validateForm () {
-      return !this.errors.any() && this.email !== '' && this.password !== ''
-    }
-  },
   methods: {
     checkLogin () {
       if (this.$store.state.auth.isUserLoggedIn()) {
@@ -60,9 +53,31 @@ export default {
       return true
     },
     loginJWT () {
+		let encontrado = false
 		for (let i in this.arrayData) {
-			let elemento = this.arrayData[i]
-			console.lo(elemento.node)
+			let elemento = this.arrayData[i].node
+
+			if (this.usuario === elemento.usuarios){
+				if (this.password === elemento.Contrasenia)
+				{
+					encontrado = true
+					localStorage.setItem('Rol', elemento.Roles)
+					localStorage.setItem('Usuario', elemento.usuarios)
+					this.$vs.notify({
+					color:'success',
+						title:`Bienvenido`,
+						text:`Bienvenido nuevamente ${this.usuario}`
+					})
+					this.$router.push('/Ventas/ventas');
+				}
+			}
+		}
+		if (encontrado==false){
+			this.$vs.notify({
+			color:'danger',
+				title:`Error`,
+				text:`Datos incorrectos, intente nuevamente`
+			})
 		}
 	},
 	async index(){
