@@ -2,7 +2,7 @@
 	<vx-card>
 		<vs-table stripe title="Sectores" pagination max-items="7" search :data="arrayData" noDataText="No hay datos disponibles">
 			<template slot="header">
-			<vs-button @click="abrirForm=true" icon-pack="feather" icon="icon-plus-circle" icon-after>Nuevo</vs-button>
+				<vs-button @click="abrirForm=true" icon-pack="feather" icon="icon-plus-circle" icon-after>Nuevo</vs-button>
 			</template>
 				<template slot="thead">
 					<vs-th >Serie</vs-th>
@@ -17,32 +17,32 @@
 
 				<template slot-scope="{data}">
 					<vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
-						<vs-td :data="data[indextr].serie">
-							{{data[indextr].serie}}
+						<vs-td :data="data[indextr].node.serie">
+							{{data[indextr].node.serie}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].cliente">
-							{{data[indextr].cliente}}
+						<vs-td :data="data[indextr].node.NombreCliente">
+							{{data[indextr].node.NombreCliente}}
 						</vs-td>
-						<vs-td :data="data[indextr].NIT">
-							{{data[indextr].NIT}}
+						<vs-td :data="data[indextr].node.nit">
+							{{data[indextr].node.nit}}
 						</vs-td>
-						<vs-td :data="data[indextr].productoN">
-							{{data[indextr].productoN}}
+						<vs-td :data="data[indextr].node.Producto.nombreProducto">
+							{{data[indextr].node.Producto.nombreProducto}}
 						</vs-td>
-						<vs-td :data="data[indextr].cantidad">
-							{{data[indextr].cantidad}}
+						<vs-td :data="data[indextr].node.cantidad">
+							{{data[indextr].node.cantidad}}
 						</vs-td>
-						<vs-td :data="data[indextr].fecha">
-							{{data[indextr].fecha}}
+						<vs-td :data="data[indextr].node.Fecha">
+							{{data[indextr].node.Fecha}}
 						</vs-td>
-						<vs-td :data="data[indextr].total">
-							{{data[indextr].total}}
+						<vs-td :data="data[indextr].node.total">
+							{{data[indextr].node.total}}
 						</vs-td>
 						<vs-td>
 							<div class="flex items-center">
-								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr])" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
-								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
+								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr].node)" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
+								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].node.id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
 							</div>
 						</vs-td>
 					</vs-tr>
@@ -133,11 +133,13 @@ export default {
 			idT: 0,
 			serieT: "",
 			NITT:"",
-			producto_idT:null,
+			producto_idT:{default: 0},
 			cantidadT:0,
 			fechaT:"",
 			totalT:0,
-			clienteT:""
+			clienteT:"",
+			editaID:null,
+			deleteId:null,
 		}
 	},
 	components: {
@@ -151,34 +153,122 @@ export default {
 	methods: {
 		traerNombre(tabla){
 			tabla.forEach(function(valor, indice, array){
-				valor.aldea_nombre=valor.aldea.nombre
+				valor.nombre=valor.node.nombreProducto
 			}); 
 			return tabla
 		},
 		getDate(datetime) {
 			let date = new Date(datetime);
-			let dateString = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+			let dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 			return dateString;
 		},
-		AgregarProducto(){
-			console.log('agregando producto')
+		async AgregarProducto(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+								createFactura(input:{
+									NombreCliente:"${this.cliente}",
+									nombreProducto:"${this.producto_id.nombre}",
+									serie:${this.serie},
+									nit:"${this.NIT}",
+									cantidad:${this.cantidad},
+									Fecha:"${this.getDate(this.fecha)}",
+									total:${this.total}
+								}){
+									Factura{
+									id
+									NombreCliente
+									Producto{
+										id
+										nombreProducto
+									}
+									serie
+									nit
+									cantidad
+									Fecha
+									total
+									}
+								}
+								}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		EditarProducto(){
-			console.log('agregando producto')
+		async EditarProducto(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+						mutation{
+							updateFactura(input:{
+								id: "${this.editaID}",
+								NombreCliente:"${this.clienteT}",
+								nombreProducto:"${this.producto_idT.nombre}",
+								serie:${this.serieT},
+								nit:"${this.NITT}",
+								cantidad:${this.cantidadT},
+								Fecha:"${this.getDate(this.fechaT)}",
+								total:${this.totalT}
+							}){
+								Factura{
+								id
+								NombreCliente
+								Producto{
+									id
+									nombreProducto
+								}
+								serie
+								nit
+								cantidad
+								Fecha
+								total
+								}
+							}
+						}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
 		Editar(dato){
-			console.log(dato)
-			this.producto_idT=dato.ProductoN,
+			let elementoE = ''
+			let encontrado = false
+			this.listadoProductos.forEach(function(elemento, indice, array) {
+				if (elemento.node.nombreProducto==dato.Producto.nombreProducto)
+					{
+						elementoE=elemento
+						encontrado=true
+					}
+				})
+			this.producto_idT = encontrado == true ? elementoE:{id:dato.Producto,nombre:'No Existe'} 
 			this.idT= dato.id,
 			this.serieT= dato.serie,
-			this.NITT=dato.NIT,
+			this.NITT=dato.nit,
 			this.cantidadT=dato.cantidad,
-			this.fechaT=new Date(dato.fecha),
+			this.fechaT=new Date(dato.Fecha),
 			this.totalT=dato.total,
-			this.clienteT=dato.cliente
+			this.clienteT=dato.NombreCliente
 			this.abrirEditar=true
+
+			this.editaID=dato.id
+			console.log('id de factura')
+			console.log(this.editaID)
 		},
 		Eliminar(id){
+			this.deleteId=id;
 			let titulo = '';
 			let color = '';
 
@@ -193,8 +283,39 @@ export default {
 				cancelText: 'Cancelar',
 			})
 		},
-		delete(){
-			console.log('aceptar Eliminar')
+		async delete(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							deleteFactura(input:{
+								id: "${this.deleteId}",
+							}){
+								Factura{
+								id
+								NombreCliente
+								Producto{
+									id
+									nombreProducto
+								}
+								serie
+								nit
+								cantidad
+								Fecha
+								total
+								}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
 		close(){
 			let titulo = "Cancelado"
@@ -206,34 +327,75 @@ export default {
 			})
 		},
 		async index(){
-			let me = this;
-			const response = await axios.get(`/api/sector/get?completo=true`)
-			.then(function (response) {
-				var respuesta= response.data;
-				me.arrayData = respuesta.sectores.data;
-				me.arrayData = me.traerNombre(me.arrayData)
-			})
-			.catch(function (error) {
-				console.log(error);
-			});
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allFacturas{
+								edges{
+								node{
+										NombreCliente,
+								Producto{
+									id,
+									nombreProducto
+								},
+									serie,
+									nit, 
+									cantidad,
+									Fecha,
+									total,
+									id,
+								}
+								}
+							}
+							}
+							`
+							}
+						})
+						// this.arrayData = result.data.data.todosProveedores
+						this.arrayData = result.data.data.allFacturas.edges
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		index2(){
-			this.arrayData = [
-				{id:1,serie:'Primero',cliente:'Uno',estado:1,NIT:"123",productoN:"asd",cantidad:5,fecha:"12-12-1998",total:150},
-				{id:2,serie:'Tercero',cliente:'Dos',estado:1,NIT:"123",productoN:"asd",cantidad:5,fecha:"12-12-1998",total:150},
-				{id:3,serie:'Cuardo',cliente:'Tres',estado:1,NIT:"123",productoN:"asd",cantidad:5,fecha:"12-12-1998",total:150},
-				{id:4,serie:'Quinto',cliente:'Cuatro',estado:1,NIT:"123",productoN:"asd",cantidad:5,fecha:"12-12-1998",total:150}
-			]
-			this.listadoProductos=[
-				{id:1,nombre:'Gas'},
-				{id:2,nombre:'Leche'},
-				{id:3,nombre:'Comida'},
-			]
-			this.fecha=new Date()
-		},
+		async index2(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allProductos{
+							edges{
+								node{
+								nombreProducto,
+								Descripcion,
+								Existencia,
+								Precio,
+								Categoria{
+									id,
+									nombreCategoria,
+								}
+								}
+							}
+							}
+							}
+							`
+							}
+						})
+						// this.arrayData = result.data.data.todosProveedores
+						this.listadoProductos = this.traerNombre(result.data.data.allProductos.edges)
+					} catch (error) {
+						console.error(error)
+			}
+		}
 	},
   	mounted(){
-    	//this.index();
+    	this.index();
 		this.index2();
   	}
 }

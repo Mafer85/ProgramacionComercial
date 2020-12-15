@@ -24,25 +24,9 @@ const router = new Router({
       children: [
         {
           path: '/',
-          redirect: '/dashboard/analytics'
+          redirect: '/admin/productos'
         },
-        {
-          path: '/dashboard/analytics',
-          name: 'dashboard-analytics',
-          component: () => import('./views/DashboardAnalytics.vue'),
-          meta: {
-            rule: 'editor'
-          }
-        },
-        {
-          path: '/dashboard/ecommerce',
-          name: 'dashboard-ecommerce',
-          component: () => import('./views/DashboardECommerce.vue'),
-          meta: {
-            rule: 'admin'
-          }
-        },
-        {
+               {
           path: '/admin/productos',
           name: 'Productos',
           component: () => import('./views/Admin/productos.vue'),
