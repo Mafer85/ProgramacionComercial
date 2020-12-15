@@ -170,7 +170,7 @@ export default {
 			this.abrirEditar=true
 			
 		},
-		async Eliminar(id){
+		Eliminar(id){
 			let titulo = '';
 			let color = '';
 			this.deleteId=id
@@ -185,7 +185,7 @@ export default {
 				cancelText: 'Cancelar',
 			})
 		},
-		delete(){
+		async delete(){
 
 			try {
 				var result = await axios({
@@ -244,13 +244,18 @@ export default {
 							`
 							}
 						})
+						this.nombre=""
+						this.descripcion=""
+						this.existencia=0
+						this.precio=0
+						this.categoria_id=null
 						this.index();
 					} catch (error) {
 						console.error(error)
 					}
+
 		},
 		async EditarProducto(){
-			console.log('esta entrando a editar')
 			try {
 				var result = await axios({
 					method: 'POST',
@@ -322,7 +327,6 @@ export default {
 						})
 						// this.arrayData = result.data.data.todosProveedores
 						this.arrayData = result.data.data.allProductos.edges
-						console.log(this.arrayData)
 					} catch (error) {
 						console.error(error)
 					}
@@ -349,8 +353,6 @@ export default {
 						})
 						// this.arrayData = result.data.data.todosProveedores
 						this.listadoCategorias = this.traerNombre(result.data.data.allCategorias.edges)
-						console.log('this.listadoCategorias')
-						console.log(this.listadoCategorias)
 					} catch (error) {
 						console.error(error)
 					}

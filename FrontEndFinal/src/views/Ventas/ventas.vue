@@ -197,6 +197,13 @@ export default {
 							`
 							}
 						})
+						this.cliente=""
+						this.producto_id=null
+						this.serie=0
+						this.NIT=""
+						this.cantidad=0
+						this.fecha=new Date()
+						this.total=0
 						this.index();
 					} catch (error) {
 						console.error(error)
@@ -262,10 +269,7 @@ export default {
 			this.totalT=dato.total,
 			this.clienteT=dato.NombreCliente
 			this.abrirEditar=true
-
 			this.editaID=dato.id
-			console.log('id de factura')
-			console.log(this.editaID)
 		},
 		Eliminar(id){
 			this.deleteId=id;

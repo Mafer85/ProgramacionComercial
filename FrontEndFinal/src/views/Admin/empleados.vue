@@ -13,17 +13,17 @@
 				<template slot-scope="{data}">
 					<vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
 
-						<vs-td :data="data[indextr].nombre">
-							{{data[indextr].nombre}}
+						<vs-td :data="data[indextr].node.usuarios">
+							{{data[indextr].node.usuarios}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].rol">
-							{{data[indextr].rol}}
+						<vs-td :data="data[indextr].node.Roles">
+							{{data[indextr].node.Roles}}
 						</vs-td>
 						<vs-td>
 							<div class="flex items-center">
-								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr])" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
-								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
+								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr].node)" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
+								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].node.id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
 							</div>
 						</vs-td>
 					</vs-tr>
@@ -40,9 +40,9 @@
 				@close="close"
 				>
 				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Usuario" v-model="usuario"></vs-input>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Password" v-model="password"></vs-input>
+				<vs-input name="event-name" v-validate="'required'" type="password" class="w-full mt-8" label-placeholder="Password" v-model="password"></vs-input>
 				<small>Rol</small>
-					<v-select name="Categoria" label="nombre" :options="listadoRoles" v-model="rol_id" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
+					<v-select label="nombre" :options="listadoRoles" v-model="rol_id" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
 			</vs-prompt>
 			<vs-prompt
 				class="calendar-event-dialog"
@@ -54,9 +54,9 @@
 				@close="close"
 				>
 				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Usuario" v-model="usuarioT"></vs-input>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Password" v-model="passwordT"></vs-input>
+				<vs-input name="event-name" type="password" v-validate="'required'" class="w-full mt-8" label-placeholder="Password" v-model="passwordT"></vs-input>
 				<small>Rol</small>
-					<v-select name="Categoria" label="nombre" :options="listadoRoles" v-model="rol_idT" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
+					<v-select label="nombre" :options="listadoRoles" v-model="rol_idT" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
 			</vs-prompt>
 
 	</vx-card>
@@ -92,6 +92,8 @@ export default {
 			password:'',
 			usuarioT:'',
 			passwordT:'',
+			editarId:null,
+			deleteId:null,
 		}
 	},
 	components: {
@@ -118,20 +120,55 @@ export default {
 			this.abrirForm=true
 		},
 		Editar(data){
-			console.log(data)
+			this.usuarioT=data.usuarios
+			this.passwordT=data.Contrasenia
+			this.editarId=data.id
+			let elementoE = ''
+			let encontrado = false
+			this.listadoRoles.forEach(function(elemento, indice, array) {
+				if (elemento.nombre==data.Roles)
+					{
+						elementoE=elemento
+						encontrado=true
+					}
+				})
+			this.rol_idT = encontrado == true ? elementoE:{id:dato.nombre,nombre:'No Existe'}
 			this.abrirEditar=true
-			this.usuarioT=data.nombre
-			this.passwordT=data.password
-			this.rol_idT=data.rol_id
 		},
-		editarUsuario(){
-			console.log('confirmar editar')
+		async editarUsuario(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+								mutation{
+									updateEmpleado(input:{
+									id: "${this.editarId}",
+									usuarios:"${this.usuarioT}",
+									Contrasenia:"${this.passwordT}",
+									Roles:"${this.rol_idT.nombre}"
+								}){
+									Empleado{
+									id
+									usuarios
+									Contrasenia
+									Roles
+									}
+								}
+								}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
 		Eliminar(id){
-			console.log(id)
 			let titulo = '';
 			let color = '';
-
+			this.deleteId=id
 			this.$vs.dialog({
 				type:'confirm',
 				color: 'danger',
@@ -143,11 +180,64 @@ export default {
 				cancelText: 'Cancelar',
 			})
 		},
-		delete(){
-			console.log('confirmar Eliminar')
+		async delete(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+								deleteEmpleado(input:{
+								id: "${this.deleteId}"
+							}){
+								Empleado{
+								id
+								usuarios
+								Contrasenia
+								Roles
+								}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		agregarUsuario(){
-			console.log('agregando usuario')
+		async agregarUsuario(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+								mutation{
+								createEmpleado(input:{
+									usuarios:"${this.usuario}"
+									Contrasenia:"${this.password}",
+									Roles:"${this.rol_id.nombre}"
+								}){
+									Empleado{
+									id
+									usuarios
+									Contrasenia
+									Roles
+									}
+								}
+								}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
+					this.usuario=""
+					this.password=""
+					this.rol_id=null
 		},
 		close(){
 			let titulo = "Cancelado"
@@ -159,34 +249,39 @@ export default {
 			})
 		},
 		async index(){
-			let me = this;
-			const response = await axios.get(`/api/sector/get?completo=true`)
-			.then(function (response) {
-				var respuesta= response.data;
-				me.arrayData = respuesta.sectores.data;
-				me.arrayData = me.traerNombre(me.arrayData)
-			})
-			.catch(function (error) {
-				console.log(error);
-			});
-		},
-		index2(){
-			this.arrayData = [
-				{id:1,nombre:'Primero',password:'Uno',rol_id:1},
-				{id:2,nombre:'Tercero',password:'Dos',rol_id:2},
-				{id:3,nombre:'Cuardo',password:'Tres',rol_id:3},
-				{id:4,nombre:'Quinto',password:'Cuatro',rol_id:4}
-			]
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allEmpleados{
+							edges{
+								node{
+								id,
+								usuarios,
+								Contrasenia,
+								Roles,
+								}
+							}
+							}
+							}
+							`
+							}
+						})
+						this.arrayData = result.data.data.allEmpleados.edges
+					} catch (error) {
+						console.error(error)
+					}
 			this.listadoRoles	=[
-				{id:1,nombre:'Gas'},
-				{id:2,nombre:'Leche'},
-				{id:3,nombre:'Comida'},
+				{id:1,nombre:'Administrador'},
+				{id:2,nombre:'Vendedor'},
 			]
 		},
 	},
   	mounted(){
-    	//this.index();
-		this.index2();
+    	this.index();
   	}
 }
 </script>

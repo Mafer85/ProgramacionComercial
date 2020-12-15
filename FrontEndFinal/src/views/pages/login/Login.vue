@@ -1,13 +1,3 @@
-<!-- =========================================================================================
-    File Name: Login.vue
-    Description: Login Page
-    ----------------------------------------------------------------------------------------
-    Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-      Author: Pixinvent
-    Author URL: http://www.themeforest.net/user/pixinvent
-========================================================================================== -->
-
-
 <template>
   <div class="h-screen flex w-full bg-img vx-row no-gutter items-center justify-center" id="page-login">
     <div class="vx-col sm:w-1/2 md:w-1/2 lg:w-3/4 xl:w-3/5 sm:m-0 m-4">
@@ -25,21 +15,11 @@
 
                 <div class="vx-card__title mb-4">
                   <h4 class="mb-4">Login</h4>
-                  <p>Welcome back, please login to your account.</p>
+                  <p>Bienveido Ingrese su cuenta para continuar</p>
                 </div>
 
                 <vs-tabs>
-                  <vs-tab label="JWT">
                     <login-jwt></login-jwt>
-                  </vs-tab>
-
-                  <vs-tab label="Firebase">
-                    <login-firebase></login-firebase>
-                  </vs-tab>
-
-                  <vs-tab label="Auth0">
-                    <login-auth0></login-auth0>
-                  </vs-tab>
                 </vs-tabs>
 
               </div>

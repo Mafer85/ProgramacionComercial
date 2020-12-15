@@ -14,17 +14,17 @@
 				<template slot-scope="{data}">
 					<vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
 
-						<vs-td :data="data[indextr].nombre">
-							{{data[indextr].id}}
+						<vs-td :data="data[indextr].node.id">
+							{{data[indextr].node.id}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].aldea_nombre">
-							{{data[indextr].nombre}}
+						<vs-td :data="data[indextr].node.nombreCategoria">
+							{{data[indextr].node.nombreCategoria}}
 						</vs-td>
 						<vs-td>
 							<div class="flex items-center">
-								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr])" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
-								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
+								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr]).node" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
+								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].node.id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
 							</div>
 						</vs-td>
 					</vs-tr>
@@ -76,13 +76,14 @@ import { es } from 'vuejs-datepicker/src/locale'
 export default {
 	data () {
 		return {
-			//Aqui van a guardar todas su variables.
 			arrayData: [],
 			abrirForm:false,
 			abrirEditar:false,
 			id: 0,
 			nombre:'',
 			nombreT:'',
+			editarId:null,
+			deleteId:null
 		}
 	},
 	components: {
@@ -106,13 +107,14 @@ export default {
 			return dateString;
 		},
 		Editar(data){
-			this.nombreT = data.nombre
+			this.nombreT = data.node.nombreCategoria
+			this.editarId = data.node.id
 			this.abrirEditar = true;
 		},
 		Eliminar(id){
 			let titulo = '';
 			let color = '';
-
+			this.deleteId=id
 			this.$vs.dialog({
 				type:'confirm',
 				color: 'danger',
@@ -124,14 +126,84 @@ export default {
 				cancelText: 'Cancelar',
 			})
 		},
-		delete(){
-			console.log('Confirmar Eliminar')
+		async delete(){
+
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							deleteCategoria(input:{
+							id: "${this.deleteId}"
+							}){
+							Categoria{
+								id
+								nombreCategoria
+							}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		editarCategoria(){
-			console.log('editado aceptar')
+		async editarCategoria(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							updateCategoria(input:{
+								id: "${this.editarId}",
+								nombreCategoria:"${this.nombreT}"
+							}){
+							Categoria{
+								id
+								nombreCategoria
+							}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		crearCategoria(){
-			console.log('agregando producto')
+		async crearCategoria(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							createCategoria(input:{
+								nombreCategoria:"${this.nombre}"
+							}){
+							Categoria{
+								id
+								nombreCategoria
+							}
+							}
+							}
+							`
+							}
+						})
+						this.nombre=""
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
+
 		},
 		close(){
 			let titulo = "Cancelado"
@@ -143,35 +215,36 @@ export default {
 			})
 		},
 		async index(){
-			let me = this;
-			this.abrir_editar=false
-			const response = await axios.get(`/api/sector/get?completo=true`)
-			.then(function (response) {
-				var respuesta= response.data;
-				me.arrayData = respuesta.sectores.data;
-				me.arrayData = me.traerNombre(me.arrayData)
-			})
-			.catch(function (error) {
-				console.log(error);
-			});
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allCategorias{
+							edges{
+								node{
+								id
+								nombreCategoria
+								}
+							}
+							}
+							}
+							`
+							}
+						})
+						this.arrayData = result.data.data.allCategorias.edges
+					} catch (error) {
+						console.error(error)
+					}
 		},
 		index2(){
-			this.arrayData = [
-				{id:1,nombre:'Primero',aldea_nombre:'Uno',estado:1},
-				{id:2,nombre:'Tercero',aldea_nombre:'Dos',estado:1},
-				{id:3,nombre:'Cuardo',aldea_nombre:'Tres',estado:1},
-				{id:4,nombre:'Quinto',aldea_nombre:'Cuatro',estado:1}
-			]
-			this.listado_aldea=[
-				{idT:1,nombre:'Gas'},
-				{idT:2,nombre:'Leche'},
-				{idT:3,nombre:'Comida'},
-			]
 		},
 	},
   	mounted(){
-    	//this.index();
-		this.index2();
+    	this.index();
+		//this.index2();
   	}
 }
 </script>

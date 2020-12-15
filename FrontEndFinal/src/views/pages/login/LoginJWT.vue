@@ -1,16 +1,14 @@
 <template>
   <div>
     <vs-input
-        v-validate="'required|email|min:3'"
-        data-vv-validate-on="blur"
         name="email"
         icon-no-border
         icon="icon icon-user"
         icon-pack="feather"
         label-placeholder="Email"
-        v-model="email"
+        v-model="usuario"
         class="w-full"/>
-    <span class="text-danger text-sm">{{ errors.first('email') }}</span>
+    <span class="text-danger text-sm">{{ errors.first('usuario') }}</span>
 
     <vs-input
         data-vv-validate-on="blur"
@@ -22,27 +20,23 @@
         icon-pack="feather"
         label-placeholder="Password"
         v-model="password"
-        class="w-full mt-6" />
+        class="w-full mt-8" />
     <span class="text-danger text-sm">{{ errors.first('password') }}</span>
 
-    <div class="flex flex-wrap justify-between my-5">
-        <vs-checkbox v-model="checkbox_remember_me" class="mb-3">Remember Me</vs-checkbox>
-        <router-link to="/pages/forgot-password">Forgot Password?</router-link>
-    </div>
-    <div class="flex flex-wrap justify-between mb-3">
-      <vs-button  type="border" @click="registerUser">Register</vs-button>
-      <vs-button :disabled="!validateForm" @click="loginJWT">Login</vs-button>
+    <div class="flex flex-wrap justify-between mb-3 mt-8">
+      <vs-button @click="loginJWT">Login</vs-button>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data () {
     return {
-      email: 'admin@admin.com',
-      password: 'adminadmin',
-      checkbox_remember_me: false
+      usuario: '',
+	  password:'',
+	  arrayData:[]
     }
   },
   computed: {
@@ -52,12 +46,7 @@ export default {
   },
   methods: {
     checkLogin () {
-      // If user is already logged in notify
       if (this.$store.state.auth.isUserLoggedIn()) {
-
-        // Close animation if passed as payload
-        // this.$vs.loading.close()
-
         this.$vs.notify({
           title: 'Login Attempt',
           text: 'You are already logged in!',
@@ -71,37 +60,46 @@ export default {
       return true
     },
     loginJWT () {
-
-      if (!this.checkLogin()) return
-
-      // Loading
-      this.$vs.loading()
-
-      const payload = {
-        checkbox_remember_me: this.checkbox_remember_me,
-        userDetails: {
-          email: this.email,
-          password: this.password
-        }
-      }
-
-      this.$store.dispatch('auth/loginJWT', payload)
-        .then(() => { this.$vs.loading.close() })
-        .catch(error => {
-          this.$vs.loading.close()
-          this.$vs.notify({
-            title: 'Error',
-            text: error.message,
-            iconPack: 'feather',
-            icon: 'icon-alert-circle',
-            color: 'danger'
-          })
-        })
-    },
-    registerUser () {
-      if (!this.checkLogin()) return
-      this.$router.push('/pages/register').catch(() => {})
-    }
+		for (let i in this.arrayData) {
+			let elemento = this.arrayData[i]
+			console.lo(elemento.node)
+		}
+	},
+	async index(){
+	try {
+		var result = await axios({
+			method: 'POST',
+			url: 'https://publicacionfinal.herokuapp.com/graphql/',
+			data: {
+				query:`
+					query{
+					allEmpleados{
+					edges{
+						node{
+						id,
+						usuarios,
+						Contrasenia,
+						Roles,
+						}
+					}
+					}
+					}
+					`
+					}
+				})
+				this.arrayData = result.data.data.allEmpleados.edges
+				console.log(this.arrayData)
+			} catch (error) {
+				console.error(error)
+			}
+	this.listadoRoles	=[
+		{id:1,nombre:'Administrador'},
+		{id:2,nombre:'Vendedor'},
+	]
+},
+  },
+  mounted(){
+	this.index();
   }
 }
 

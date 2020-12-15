@@ -106,7 +106,6 @@ export default{
 
       this.$store.dispatch('todo/updateTask', Object.assign({}, this.taskLocal, {isTrashed: true}))
         .then((response) => {
-          // console.log(response.data);
           this.taskLocal.isTrashed = response.data.isTrashed
           this.$el.style.display = 'none'   // Hides element from DOM
         })
