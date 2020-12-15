@@ -16,35 +16,51 @@
 				<template slot-scope="{data}">
 					<vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
 
-						<vs-td :data="data[indextr].nombre">
-							{{data[indextr].nombre}}
+						<vs-td :data="data[indextr].node.nombreProducto">
+							{{data[indextr].node.nombreProducto}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].descripcion">
-							{{data[indextr].descripcion}}
+						<vs-td :data="data[indextr].node.Descripcion">
+							{{data[indextr].node.Descripcion}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].existencia">
-							{{data[indextr].existencia}}
+						<vs-td :data="data[indextr].node.Existencia">
+							{{data[indextr].node.Existencia}}
 						</vs-td>
-						<vs-td :data="data[indextr].precio">
-							{{data[indextr].precio}}
+						<vs-td :data="data[indextr].node.Precio">
+							{{data[indextr].node.Precio}}
 						</vs-td>
 
-						<vs-td :data="data[indextr].categoria">
-							{{data[indextr].categoria}}
+						<vs-td :data="data[indextr].node.Categoria.nombreCategoria">
+							{{data[indextr].node.Categoria.nombreCategoria}}
 						</vs-td>
 						
 						<vs-td>
 							<div class="flex items-center">
-								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr])" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
-								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
+								<vx-tooltip text="Editar"><vs-button @click="Editar(data[indextr].node)" radius color="dark" type="flat" icon="edit" size="large">  </vs-button>  </vx-tooltip>
+								<vx-tooltip text="Eliminar"><vs-button @click="Eliminar(data[indextr].node.id)" radius color="dark" type="flat" icon="delete" size="large"> </vs-button></vx-tooltip>
 							</div>
 						</vs-td>
 
 					</vs-tr>
 				</template>
 			</vs-table>
+			<vs-prompt
+				class="calendar-event-dialog"
+				title="Guardar Producto"
+				accept-text= "Guardar"
+				@accept="AgregarProducto"
+				:active.sync="abrirForm"
+				@cancel="close"
+				@close="close"
+				>
+				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Nombre" v-model="nombre"></vs-input>
+				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Descripcion" v-model="descripcion"></vs-input>
+				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Existencia" v-model="existencia"></vs-input>
+				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Precio" v-model="precio"></vs-input>
+				<small>Categoria</small>
+					<v-select name="Categoria" label="nombreCategoria" :options="listadoCategorias" v-model="categoria_id" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
+			</vs-prompt>
 
 			<vs-prompt
 				class="calendar-event-dialog"
@@ -60,26 +76,9 @@
 				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Existencia" v-model="existenciaT"></vs-input>
 				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Precio" v-model="precioT"></vs-input>
 				<small>Categoria</small>
-					<v-select name="Categoria" label="nombre" :options="listadoCategorias" v-model="categoria_idT" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
-				<span class="text-danger">{{ errors.first('aldea') }}</span>
+					<v-select name="Categoria" label="nombreCategoria" :options="listadoCategorias" v-model="categoria_idT" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
 			</vs-prompt>
-			<vs-prompt
-				class="calendar-event-dialog"
-				title="Guardar Producto"
-				accept-text= "Guardar"
-				@accept="AgregarProducto"
-				:active.sync="abrirForm"
-				@cancel="close"
-				@close="close"
-				>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Nombre" v-model="nombre"></vs-input>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Descripcion" v-model="descripcion"></vs-input>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Existencia" v-model="existencia"></vs-input>
-				<vs-input name="event-name" v-validate="'required'" class="w-full mt-8" label-placeholder="Precio" v-model="precio"></vs-input>
-				<small>Categoria</small>
-					<v-select name="Categoria" label="nombre" :options="listadoCategorias" v-model="categoria_id" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
-				<span class="text-danger">{{ errors.first('aldea') }}</span>
-			</vs-prompt>
+
 
 	</vx-card>
 </template>
@@ -127,7 +126,9 @@ export default {
 			existenciaT:"",
 			precioT:"",
 			categoria_idT:"",
-			totalT:""
+			totalT:"",
+			editarId:null,
+			deleteId:null
 		}
 	},
 	components: {
@@ -141,7 +142,7 @@ export default {
 	methods: {
 		traerNombre(tabla){
 			tabla.forEach(function(valor, indice, array){
-				valor.aldea_nombre=valor.aldea.nombre
+				valor.nombreCategoria=valor.node.nombreCategoria
 			}); 
 			return tabla
 		},
@@ -151,18 +152,28 @@ export default {
 			return dateString;
 		},
 		Editar(datos){
-			console.log(datos)
-			this.nombreT=datos.nombre
-			this.descripcionT=datos.descripcion
-			this.existenciaT=datos.existencia
-			this.precioT=datos.precio
-			this.categoria_idT=datos.categoria
+			this.nombreT=datos.nombreProducto
+			this.descripcionT=datos.Descripcion
+			this.existenciaT=datos.Existencia
+			this.precioT=datos.Precio
+			let elementoE = ''
+			let encontrado = false
+			this.listadoCategorias.forEach(function(elemento, indice, array) {
+				if (elemento.node.nombreCategoria==datos.Categoria.nombreCategoria)
+					{
+						elementoE=elemento
+						encontrado=true
+					}
+				})
+			this.categoria_idT = encontrado == true ? elementoE:{id:datos.Categoria,nombreCategoria:'No Existe'} 
+			this.editarId=datos.id
 			this.abrirEditar=true
+			
 		},
-		Eliminar(id){
+		async Eliminar(id){
 			let titulo = '';
 			let color = '';
-
+			this.deleteId=id
 			this.$vs.dialog({
 				type:'confirm',
 				color: 'danger',
@@ -175,13 +186,103 @@ export default {
 			})
 		},
 		delete(){
-			console.log('Confirmar Eliminar')
+
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							deleteProducto(input:{
+								id: "${this.deleteId}"
+							}){
+								Producto{
+								id
+								nombreProducto
+								Descripcion
+								Existencia
+								Precio
+								nombreProducto
+								}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
+
 		},
-		AgregarProducto(){
-			console.log('agregando producto')
+		async AgregarProducto(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+						mutation{
+						createProducto(input:{
+								nombreProducto:"${this.nombre}",
+								Descripcion:"${this.descripcion}",
+								Existencia:${this.existencia},
+								Precio:${this.precio},
+								nombreCategoria:"${this.categoria_id.nombreCategoria}"
+						}){
+							Producto{
+							id
+							nombreProducto
+							Descripcion
+							Existencia
+							Precio
+							nombreProducto
+							}
+						}
+						}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		EditarProducto(){
-			console.log('editado aceptar')
+		async EditarProducto(){
+			console.log('esta entrando a editar')
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							mutation{
+							updateProducto(input:{
+								id: "${this.editarId}",
+								nombreProducto:"${this.nombreT}",
+								Descripcion:"${this.descripcionT}",
+								Existencia:${this.existenciaT},
+								Precio:${this.precioT},
+								nombreCategoria:"${this.categoria_idT.nombreCategoria}"
+							}){
+								Producto{
+								id
+								nombreProducto
+								Descripcion
+								Existencia
+								Precio
+								nombreProducto
+								}
+							}
+							}
+							`
+							}
+						})
+						this.index();
+					} catch (error) {
+						console.error(error)
+					}
 		},
 		close(){
 			let titulo = "Cancelado"
@@ -193,33 +294,70 @@ export default {
 			})
 		},
 		async index(){
-			let me = this;
-			const response = await axios.get(`/api/sector/get?completo=true`)
-			.then(function (response) {
-				var respuesta= response.data;
-				me.arrayData = respuesta.sectores.data;
-				me.arrayData = me.traerNombre(me.arrayData)
-			})
-			.catch(function (error) {
-				console.log(error);
-			});
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allProductos{
+							edges{
+								node{
+								id,
+								nombreProducto,
+								Descripcion,
+								Existencia,
+								Precio,
+								Categoria{
+									id,
+									nombreCategoria,
+								}
+								}
+							}
+							}
+							}
+							`
+							}
+						})
+						// this.arrayData = result.data.data.todosProveedores
+						this.arrayData = result.data.data.allProductos.edges
+						console.log(this.arrayData)
+					} catch (error) {
+						console.error(error)
+					}
 		},
-		index2(){
-			this.arrayData = [
-				{id:1,nombre:'Primero',descripcion:'Uno',existencia:1,precio:100,categoria:'primero'},
-				{id:2,nombre:'Tercero',descripcion:'Dos',existencia:1,precio:100,categoria:'primero'},
-				{id:3,nombre:'Cuardo',descripcion:'Tres',existencia:1,precio:100,categoria:'primero'},
-				{id:4,nombre:'Quinto',descripcion:'Cuatro',existencia:1,precio:100,categoria:'primero'}
-			]
-			this.listadoCategorias=[
-				{id:1,nombre:'Gas'},
-				{id:2,nombre:'Leche'},
-				{id:3,nombre:'Comida'},
-			]
+		async index2(){
+			try {
+				var result = await axios({
+					method: 'POST',
+					url: 'https://publicacionfinal.herokuapp.com/graphql/',
+					data: {
+						query:`
+							query{
+							allCategorias{
+							edges{
+								node{
+								id
+								nombreCategoria
+								}
+							}
+							}
+							}
+							`
+							}
+						})
+						// this.arrayData = result.data.data.todosProveedores
+						this.listadoCategorias = this.traerNombre(result.data.data.allCategorias.edges)
+						console.log('this.listadoCategorias')
+						console.log(this.listadoCategorias)
+					} catch (error) {
+						console.error(error)
+					}
 		},
 	},
   	mounted(){
-    	//this.index();
+    	this.index();
 		this.index2();
   	}
 }
