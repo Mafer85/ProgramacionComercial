@@ -73,9 +73,6 @@ export default {
 	cargarDatos(){
 		this.rolN= localStorage.getItem('Rol') ? localStorage.getItem('Rol') : null
 		this.usuarioN= localStorage.getItem('Usuario') ? localStorage.getItem('Usuario') : null
-		console.log('*************************')
-		console.log(this.usuarioN)
-		console.log(this.rolN)
 	}
   },
   mounted() {

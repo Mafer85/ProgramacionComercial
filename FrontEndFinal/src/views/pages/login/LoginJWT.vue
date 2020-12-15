@@ -5,7 +5,7 @@
         icon-no-border
         icon="icon icon-user"
         icon-pack="feather"
-        label-placeholder="Email"
+        label-placeholder="Usuario"
         v-model="usuario"
         class="w-full"/>
     <span class="text-danger text-sm">{{ errors.first('usuario') }}</span>
