@@ -1,7 +1,5 @@
 let rolId= localStorage.getItem('Rol') ? localStorage.getItem('Rol') : null
 let UsuarioN= localStorage.getItem('Usuario') ? localStorage.getItem('Usuario') : null
-console.log('******************')
-console.log(rolId)
 
 export default 
 	rolId=='Vendedor'?

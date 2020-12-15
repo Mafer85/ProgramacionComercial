@@ -2,8 +2,9 @@
   <div class="the-navbar__user-meta flex items-center" v-if="activeUserInfo.displayName">
 
     <div class="text-right leading-tight hidden sm:block">
-      <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
-      <small>Available</small>
+      <p class="font-semibold">{{ usuarioN }}</p>
+      <small>{{rolN}}</small>
+
     </div>
 
     <vs-dropdown vs-custom-content vs-trigger-click class="cursor-pointer">
@@ -33,7 +34,8 @@ import 'firebase/auth'
 export default {
   data () {
     return {
-
+		usuarioN:"",
+		rolN:""
     }
   },
   computed: {
@@ -67,7 +69,17 @@ export default {
 
       // This is just for demo Purpose. If user clicks on logout -> redirect
 		location.replace('/pages/login'); 
-    }
-  }
+	},
+	cargarDatos(){
+		this.rolN= localStorage.getItem('Rol') ? localStorage.getItem('Rol') : null
+		this.usuarioN= localStorage.getItem('Usuario') ? localStorage.getItem('Usuario') : null
+		console.log('*************************')
+		console.log(this.usuarioN)
+		console.log(this.rolN)
+	}
+  },
+  mounted() {
+	  this.cargarDatos();
+  },
 }
 </script>

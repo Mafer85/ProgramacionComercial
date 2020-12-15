@@ -103,7 +103,6 @@ export default {
 					}
 				})
 				this.arrayData = result.data.data.allEmpleados.edges
-				console.log(this.arrayData)
 			} catch (error) {
 				console.error(error)
 			}
